@@ -62,7 +62,7 @@ static void ath6kl_calculate_crc(u32 target_type, u8 *data, size_t len)
 	ath6kl_dbg(ATH6KL_DBG_BOOT, "New Checksum: %u\n", checksum);
 }
 
-#ifdef CONFIG_MACH_PX
+#ifdef CONFIG_MACH_MSM7X27A_FFA
 static int ath6kl_fetch_nvmac_info(struct ath6kl *ar)
 {
 	char softmac_filename[256];
@@ -70,7 +70,7 @@ static int ath6kl_fetch_nvmac_info(struct ath6kl *ar)
 
 	do {
 		snprintf(softmac_filename, sizeof(softmac_filename),
-			 "/data/.nvmac.info");
+			 "/efs/wifi/.mac.info");
 
 		if ( (ret = android_readwrite_file(
 			softmac_filename, NULL, NULL, 0)) < 0) {
@@ -81,7 +81,7 @@ static int ath6kl_fetch_nvmac_info(struct ath6kl *ar)
 		ath6kl_softmac = vmalloc(ath6kl_softmac_len);
 		if (!ath6kl_softmac) {
 			ath6kl_dbg(ATH6KL_DBG_BOOT,
-			   "%s: Cannot allocate buffer for nvmac.info"
+			   "%s: Cannot allocate buffer for .mac.info"
 			   "(%d)\n", __func__,ath6kl_softmac_len);
 			ret = -ENOMEM;
 			break;
@@ -138,7 +138,7 @@ void ath6kl_mangle_mac_address(struct ath6kl *ar, u8 locally_administered_bit)
 {
 	u8 *ptr_mac;
 	int i, ret;
-#if defined(CONFIG_MACH_PX) || defined(CONFIG_MACH_JENA)
+#if defined(CONFIG_MACH_MSM7X27A_FFA) || defined(CONFIG_MACH_JENA)
 	unsigned int softmac[6];
 #endif
 
@@ -162,7 +162,7 @@ void ath6kl_mangle_mac_address(struct ath6kl *ar, u8 locally_administered_bit)
 		   ptr_mac[0], ptr_mac[1], ptr_mac[2],
 		   ptr_mac[3], ptr_mac[4], ptr_mac[5]);
 
-#if defined(CONFIG_MACH_PX) || defined(CONFIG_MACH_JENA)
+#if defined(CONFIG_MACH_MSM7X27A_FFA) || defined(CONFIG_MACH_JENA)
 #ifdef CONFIG_MACH_JENA
 	ret = ath6kl_fetch_mac_file(ar);
 #else
