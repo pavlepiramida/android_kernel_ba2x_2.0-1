@@ -30,6 +30,15 @@
 #include <linux/dmaengine.h>
 #include <linux/hrtimer.h>
 
+//@majonez
+#include <linux/version.h>
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,3,0)
+extern struct sk_buff *__pskb_copy(struct sk_buff *skb,
+                                   int headroom, gfp_t gfp_mask);
+#endif
+//@
+
 /* Don't change this without changing skb_csum_unnecessary! */
 #define CHECKSUM_NONE 0
 #define CHECKSUM_UNNECESSARY 1

@@ -5,6 +5,13 @@
 
 #include <asm/errno.h>
 
+//@majonez
+#include <linux/version.h>
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,12,0)
+#define PTR_ERR_OR_ZERO(p) PTR_RET(p)
+#endif
+//
+
 /*
  * Kernel pointers have redundant information, so we can use a
  * scheme where we can return either an error code or a dentry

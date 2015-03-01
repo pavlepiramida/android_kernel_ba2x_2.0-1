@@ -521,6 +521,10 @@ extern void tty_port_close(struct tty_port *port,
 				struct tty_struct *tty, struct file *filp);
 extern int tty_port_open(struct tty_port *port,
 				struct tty_struct *tty, struct file *filp);
+extern int tty_port_install(struct tty_port *port, struct tty_driver *driver,
+                            struct tty_struct *tty);
+extern int tty_standard_install(struct tty_driver *driver,
+                                struct tty_struct *tty);
 static inline int tty_port_users(struct tty_port *port)
 {
 	return port->count + port->blocked_open;
@@ -605,7 +609,10 @@ extern void __lockfunc tty_lock(void) __acquires(tty_lock);
 extern void __lockfunc tty_unlock(void) __releases(tty_lock);
 extern struct task_struct *__big_tty_mutex_owner;
 #define tty_locked()		(current == __big_tty_mutex_owner)
-
+// @daniel, backport 3.13-1
+#define tty_port_register_device(port, driver, index, device) \
+tty_register_device(driver, index, device)
+// @
 /*
  * wait_event_interruptible_tty -- wait for a condition with the tty lock held
  *

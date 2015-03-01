@@ -1,5 +1,8 @@
 #ifndef _LINUX_EXPORT_H
 #define _LINUX_EXPORT_H
+
+#include <linux/module.h>
+
 /*
  * Export symbols from the kernel to modules.  Forked from module.h
  * to reduce the amount of pointless cruft we feed to gcc when only

@@ -12,6 +12,60 @@
 #include <linux/threads.h>
 #include <asm/atomic.h>
 
+
+// @daniel, backport 3.31-1
+#define __WQ_ORDERED	0
+
+#ifndef __ARG_PLACEHOLDER_1
+#define __ARG_PLACEHOLDER_1 0,
+#define config_enabled(cfg) _config_enabled(cfg)
+#define _config_enabled(value) __config_enabled(__ARG_PLACEHOLDER_##value)
+#define __config_enabled(arg1_or_junk) ___config_enabled(arg1_or_junk 1, 0)
+#define ___config_enabled(__ignored, val, ...) val
+
+/*
+ * 3.1 - 3.3 had a broken version of this, so undef
+ * (they didn't have __ARG_PLACEHOLDER_1)
+ */
+#undef IS_ENABLED
+#define IS_ENABLED(option) \
+(config_enabled(option) || config_enabled(option##_MODULE))
+#endif
+
+/*
+ * commit b196be89cdc14a88cc637cdad845a75c5886c82d
+ * Author: Tejun Heo <tj@kernel.org>
+ * Date:   Tue Jan 10 15:11:35 2012 -0800
+ *
+ *     workqueue: make alloc_workqueue() take printf fmt and args for name
+ */
+struct workqueue_struct *
+backport_alloc_workqueue(const char *fmt, unsigned int flags,
+                         int max_active, struct lock_class_key *key,
+                         const char *lock_name, ...);
+#undef bp_alloc_workqueue
+#ifdef CONFIG_LOCKDEP_SUPPORT
+#define bp_alloc_workqueue(fmt, flags, max_active, args...)		\
+({									\
+static struct lock_class_key __key;				\
+const char *__lock_name;					\
+\
+if (__builtin_constant_p(fmt))					\
+__lock_name = (fmt);					\
+else								\
+__lock_name = #fmt;					\
+\
+backport_alloc_workqueue((fmt), (flags), (max_active),		\
+&__key, __lock_name, ##args);		\
+})
+#else
+#define bp_alloc_workqueue(fmt, flags, max_active, args...)		\
+backport_alloc_workqueue((fmt), (flags), (max_active),		\
+NULL, NULL, ##args)
+#endif
+// @
+
+
 struct workqueue_struct;
 
 struct work_struct;
@@ -300,9 +354,32 @@ extern struct workqueue_struct *system_unbound_wq;
 extern struct workqueue_struct *system_freezable_wq;
 extern struct workqueue_struct *system_nrt_freezable_wq;
 
+// @daniel, backport 3.31-1
 extern struct workqueue_struct *
 __alloc_workqueue_key(const char *name, unsigned int flags, int max_active,
-		      struct lock_class_key *key, const char *lock_name);
+                      struct lock_class_key *key, const char *lock_name);
+
+#undef bp_alloc_workqueue
+#ifdef CONFIG_LOCKDEP
+#define bp_alloc_workqueue(fmt, flags, max_active, args...)		\
+({									\
+static struct lock_class_key __key;				\
+const char *__lock_name;					\
+\
+if (__builtin_constant_p(fmt))					\
+__lock_name = (fmt);					\
+else								\
+__lock_name = #fmt;					\
+\
+backport_alloc_workqueue((fmt), (flags), (max_active),		\
+&__key, __lock_name, ##args);		\
+})
+#else
+#define bp_alloc_workqueue(fmt, flags, max_active, args...)		\
+backport_alloc_workqueue((fmt), (flags), (max_active),		\
+NULL, NULL, ##args)
+#endif
+// @
 
 #ifdef CONFIG_LOCKDEP
 #define alloc_workqueue(name, flags, max_active)		\
@@ -349,6 +426,13 @@ alloc_ordered_workqueue(const char *name, unsigned int flags)
 	alloc_workqueue((name), WQ_UNBOUND | WQ_MEM_RECLAIM, 1)
 
 extern void destroy_workqueue(struct workqueue_struct *wq);
+// @daniel, backport 3.13-1
+#undef bp_alloc_ordered_workqueue
+#define bp_alloc_ordered_workqueue(fmt, flags, args...) \
+bp_alloc_workqueue(fmt, WQ_UNBOUND | __WQ_ORDERED | (flags), 1, ##args)
+#define bp_destroy_workqueue backport_destroy_workqueue
+void backport_destroy_workqueue(struct workqueue_struct *wq);
+// @
 
 extern int queue_work(struct workqueue_struct *wq, struct work_struct *work);
 extern int queue_work_on(int cpu, struct workqueue_struct *wq,
