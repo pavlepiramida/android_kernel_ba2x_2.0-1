@@ -1369,7 +1369,7 @@ static int ath6kl_upload_otp(struct ath6kl *ar)
 	ath6kl_dbg(ATH6KL_DBG_BOOT, "executing OTP at 0x%x\n",
 		   ar->hw.app_start_override_addr);
 
-#ifdef CONFIG_MACH_PX
+#ifdef CONFIG_MACH_MSM7X27A_FFA
 	/* SOFTMAC has higher priority than OTP MAC */
 	param = 1;
 #else
