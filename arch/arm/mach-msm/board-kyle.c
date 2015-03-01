@@ -3334,7 +3334,7 @@ static void keypad_gpio_init(void)
 
 #define KP_INDEX(row, col) ((row)*ARRAY_SIZE(kp_col_gpios) + (col))
 
-#if defined(CONFIG_MACH_KYLE_HWREV) && ((CONFIG_MACH_KYLE_HWREV == 0x0) || (CONFIG_MACH_KYLE_HWREV == 0x1))
+#if (CONFIG_MACH_KYLE_HWREV == 0x0) || (CONFIG_MACH_KYLE_HWREV == 0x1)
 	static unsigned int kp_row_gpios[] = {36, 37, 39};
 	static unsigned int kp_col_gpios[] = {31};
 	static unsigned int kp_wakeup_gpios[] = {37};
