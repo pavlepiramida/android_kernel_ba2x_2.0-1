@@ -2031,7 +2031,11 @@ EXPORT_SYMBOL_GPL(cpufreq_unregister_driver);
 
 static int __init cpufreq_core_init(void)
 {
-	int cpu, rc;
+	int cpu;
+    
+#ifdef CONFIG_CPU_FREQ_VDD_LEVELS
+    int rc;
+#endif  /* CONFIG_CPU_FREQ_VDD_LEVELS */
 
 	for_each_possible_cpu(cpu) {
 		per_cpu(cpufreq_policy_cpu, cpu) = -1;

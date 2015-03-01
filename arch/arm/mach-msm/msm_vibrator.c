@@ -346,10 +346,10 @@ static enum hrtimer_restart vibrator_timer_func(struct hrtimer *timer)
 	timed_vibrator_off(NULL);
 	return HRTIMER_NORESTART;
 #else
-	unsigned int remain;
-
+    
 	printk("[VIB] %s\n",__func__);
 #if !defined(CONFIG_MACH_AMAZING_CDMA) && !defined(CONFIG_MACH_KYLE) && !defined(CONFIG_MACH_KYLE_I)
+    unsigned int remain;
 	if(hrtimer_active(&vibe_timer)) {
 		ktime_t r = hrtimer_get_remaining(&vibe_timer);
 		remain=ktime_to_ms(r);

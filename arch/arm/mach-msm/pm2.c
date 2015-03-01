@@ -1821,7 +1821,7 @@ static int msm_reboot_call
 {
 	int dump_enable_flag;
 	unsigned size;
-	unsigned int debug_level, rory_control;
+	unsigned int debug_level;
 	unsigned long value;
 
 	samsung_vendor1_id *smem_vendor1 = \

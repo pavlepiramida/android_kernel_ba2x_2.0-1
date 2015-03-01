@@ -42,7 +42,7 @@ static int pc_clk_enable(struct clk *clk)
 	 */
 #if 1
 	if (id == 86) {
-		pr_info("[%s] get 86 clk \n");
+		pr_info("get 86 clk \n");
 		return 0;
 	}
 #endif

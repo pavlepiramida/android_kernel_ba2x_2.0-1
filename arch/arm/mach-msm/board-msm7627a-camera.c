@@ -346,7 +346,7 @@ static uint32_t camera_on_gpio_table[] = {
 	GPIO_CFG(96, 0, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_DOWN, GPIO_CFG_2MA),
 	GPIO_CFG(98, 0, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_DOWN, GPIO_CFG_2MA),
 	GPIO_CFG(107, 0, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_DOWN, GPIO_CFG_2MA),
-#elif CONFIG_MACH_AMAZING
+#elif defined(CONFIG_MACH_AMAZING) && CONFIG_MACH_AMAZING
 	GPIO_CFG(15, 0, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_DOWN, GPIO_CFG_6MA),
 #else
 	GPIO_CFG(15, 1, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_DOWN, GPIO_CFG_6MA),
@@ -1002,7 +1002,7 @@ static void __init register_i2c_devices(void)
 
 void __init msm7627a_camera_init(void)
 {
-	int rc;
+	/*int rc;*/
 	printk("##################kkkkkk msm7627a_camera_init\n");
 
 #ifndef CONFIG_MSM_CAMERA_V4L2
