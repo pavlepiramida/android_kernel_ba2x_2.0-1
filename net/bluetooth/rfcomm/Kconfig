@@ -1,6 +1,5 @@
 config BT_RFCOMM
 	tristate "RFCOMM protocol support"
-	depends on m
 	depends on BT
 	help
 	  RFCOMM provides connection oriented stream transport.  RFCOMM

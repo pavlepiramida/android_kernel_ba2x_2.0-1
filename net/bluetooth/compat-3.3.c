@@ -154,7 +154,7 @@ void backport_destroy_workqueue(struct workqueue_struct *wq)
 	struct wq_name *n, *tmp;
 
 	/* call original */
-	destroy_workqueue1(wq);
+	destroy_workqueue(wq);
 
 	spin_lock(&wq_name_lock);
 	list_for_each_entry_safe(n, tmp, &wq_name_list, list) {

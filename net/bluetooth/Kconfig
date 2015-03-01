@@ -6,7 +6,6 @@ menuconfig BT
 	depends on !BACKPORT_KERNEL_2_6_27
 	depends on !BACKPORT_KERNEL_2_6_29
 	tristate "Bluetooth subsystem support"
-	depends on m
 	depends on NET && !S390
 	depends on RFKILL || !RFKILL
 	depends on CRC16

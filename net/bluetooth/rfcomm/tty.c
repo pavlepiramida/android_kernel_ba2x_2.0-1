@@ -576,11 +576,14 @@ int rfcomm_dev_ioctl(struct sock *sk, unsigned int cmd, void __user *arg)
 static void rfcomm_dev_data_ready(struct rfcomm_dlc *dlc, struct sk_buff *skb)
 {
 	struct rfcomm_dev *dev = dlc->owner;
+    struct tty_struct *tty;
 
 	if (!dev) {
 		kfree_skb(skb);
 		return;
 	}
+    
+    tty = tty_port_tty_get(&dev->port);
 
 	if (!skb_queue_empty(&dev->pending)) {
 		skb_queue_tail(&dev->pending, skb);
@@ -590,7 +593,7 @@ static void rfcomm_dev_data_ready(struct rfcomm_dlc *dlc, struct sk_buff *skb)
 	BT_DBG("dlc %p len %d", dlc, skb->len);
 
 	tty_insert_flip_string(&dev->port, skb->data, skb->len);
-	tty_flip_buffer_push(&dev->port);
+	tty_flip_buffer_push(tty);
 
 	kfree_skb(skb);
 }
@@ -635,7 +638,10 @@ static void rfcomm_dev_modem_status(struct rfcomm_dlc *dlc, u8 v24_sig)
 static void rfcomm_tty_copy_pending(struct rfcomm_dev *dev)
 {
 	struct sk_buff *skb;
+    struct tty_struct *tty;
 	int inserted = 0;
+    
+    tty = tty_port_tty_get(&dev->port);
 
 	BT_DBG("dev %p", dev);
 
@@ -650,7 +656,7 @@ static void rfcomm_tty_copy_pending(struct rfcomm_dev *dev)
 	rfcomm_dlc_unlock(dev->dlc);
 
 	if (inserted > 0)
-		tty_flip_buffer_push(&dev->port);
+		tty_flip_buffer_push(tty);
 }
 
 /* do the reverse of install, clearing the tty fields and releasing the
