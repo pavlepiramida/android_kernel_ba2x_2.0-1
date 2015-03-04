@@ -336,12 +336,6 @@ extern int		init_dummy_netdev(struct net_device *dev);
 
 #else
 
-static inline void netdev_attach_ops(struct net_device *dev,
-		       const struct net_device_ops *ops)
-{
-	dev->netdev_ops = ops;
-}
-
 #define compat_pci_suspend(fn)
 #define compat_pci_resume(fn)
 

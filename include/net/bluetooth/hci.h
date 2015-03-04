@@ -44,6 +44,8 @@
 #define HCI_DEV_DOWN			4
 #define HCI_DEV_SUSPEND			5
 #define HCI_DEV_RESUME			6
+#define HCI_DEV_WRITE			7
+#define HCI_DEV_READ			8
 
 /* HCI notify events */
 #define HCI_NOTIFY_CONN_ADD		1
@@ -211,6 +213,17 @@ enum {
 
 #define SCO_ESCO_MASK  (ESCO_HV1 | ESCO_HV2 | ESCO_HV3)
 #define EDR_ESCO_MASK  (ESCO_2EV3 | ESCO_3EV3 | ESCO_2EV5 | ESCO_3EV5)
+
+/* SS_BLUETOOTH(is80.hwang) 2012.03.02 */
+/* change applied EDR ESCO packet */
+#ifdef CONFIG_BT_CSR8811
+#define ALL_ESCO_MASK (SCO_ESCO_MASK | ESCO_EV3 | ESCO_EV4 | ESCO_EV5 | \
+ESCO_2EV3 /*EDR_ESCO_MASK*/)
+#else
+#define ALL_ESCO_MASK	(SCO_ESCO_MASK | ESCO_EV3 | ESCO_EV4 | ESCO_EV5 | \
+EDR_ESCO_MASK)
+#endif
+/* SS_BLUEZ_BT(is80.hwang) End */
 
 /* ACL flags */
 #define ACL_START_NO_FLUSH	0x00
