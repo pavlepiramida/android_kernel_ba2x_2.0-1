@@ -112,7 +112,12 @@ struct inet_connection_sock {
 		unsigned long	  timeout;	 /* Currently scheduled timeout		   */
 		__u32		  lrcvtime;	 /* timestamp of last received data packet */
 		__u16		  last_seg_size; /* Size of last incoming segment	   */
-		__u16		  rcv_mss;	 /* MSS used for delayed ACK decisions	   */ 
+		__u16		  _rcv_mss;	 /* MSS used for delayed ACK decisions	   */
+		__u32		  calc_thresh;   /* rcv_mss * tcp_delack_segs          */
+		__u16		  tcp_delack_min; /* Minimum ack delay in ms               */
+		__u16		  tcp_delack_max; /* Minimum ack delay in ms               */
+		__u16		  tcp_delack_segs;/* Delay # of segs before sending ack    */
+		__u16		  UNUSED_HOLE;    /* Add new member(s) here                */
 	} icsk_ack;
 	struct {
 		int		  enabled;
@@ -170,10 +175,30 @@ static inline int inet_csk_ack_scheduled(const struct sock *sk)
 	return inet_csk(sk)->icsk_ack.pending & ICSK_ACK_SCHED;
 }
 
-static inline void inet_csk_delack_init(struct sock *sk)
+static inline __u16 inet_csk_get_rcv_mss(const struct sock *sk)
 {
-	memset(&inet_csk(sk)->icsk_ack, 0, sizeof(inet_csk(sk)->icsk_ack));
+	return inet_csk(sk)->icsk_ack._rcv_mss;
 }
+
+static inline void inet_csk_recalc_delack_thresh(struct sock *sk)
+{
+       struct inet_connection_sock *icsk = inet_csk(sk);
+       icsk->icsk_ack.calc_thresh =
+               icsk->icsk_ack._rcv_mss * icsk->icsk_ack.tcp_delack_segs;
+}
+
+static inline void inet_csk_set_rcv_mss(struct sock *sk, __u16 rcv_mss)
+{
+	inet_csk(sk)->icsk_ack._rcv_mss = rcv_mss;
+	inet_csk_recalc_delack_thresh(sk);
+}
+
+static inline u32 inet_csk_delack_thresh(const struct sock *sk)
+{
+       return inet_csk(sk)->icsk_ack.calc_thresh;
+}
+
+extern void inet_csk_delack_init(struct sock *sk);
 
 extern void inet_csk_delete_keepalive_timer(struct sock *sk);
 extern void inet_csk_reset_keepalive_timer(struct sock *sk, unsigned long timeout);

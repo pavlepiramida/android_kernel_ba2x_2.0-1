@@ -107,6 +107,13 @@ enum {
 #define TCP_THIN_DUPACK         17      /* Fast retrans. after 1 dupack */
 #define TCP_USER_TIMEOUT	18	/* How long for loss retry before timeout */
 
+#define TCP_REPAIR_QUEUE	20
+#define TCP_QUEUE_SEQ		21
+#define TCP_REPAIR_OPTIONS	22
+#define TCP_DELACK_SEGS         23 /* Number of segments per delayed ack */
+#define TCP_DELACK_MIN          24 /* minimum delayed ack, in miliseconds */
+#define TCP_DELACK_MAX          25 /* maximum delayed ack, in miliseconds */
+
 /* for TCP_INFO socket option */
 #define TCPI_OPT_TIMESTAMPS	1
 #define TCPI_OPT_SACK		2

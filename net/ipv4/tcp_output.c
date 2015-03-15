@@ -63,6 +63,11 @@ int sysctl_tcp_slow_start_after_idle __read_mostly = 1;
 int sysctl_tcp_cookie_size __read_mostly = 0; /* TCP_COOKIE_MAX */
 EXPORT_SYMBOL_GPL(sysctl_tcp_cookie_size);
 
+int sysctl_tcp_default_delack_min __read_mostly = TCP_DELACK_MIN_DEFAULT;
+EXPORT_SYMBOL(sysctl_tcp_default_delack_min);
+
+int sysctl_tcp_default_delack_max __read_mostly = TCP_DELACK_MAX_DEFAULT;
+EXPORT_SYMBOL(sysctl_tcp_default_delack_max);
 
 /* Account for new data that has been sent to the network. */
 static void tcp_event_new_data_sent(struct sock *sk, struct sk_buff *skb)
@@ -1902,7 +1907,7 @@ u32 __tcp_select_window(struct sock *sk)
 	 * but may be worse for the performance because of rcv_mss
 	 * fluctuations.  --SAW  1998/11/1
 	 */
-	int mss = icsk->icsk_ack.rcv_mss;
+	int mss = inet_csk_get_rcv_mss(sk);
 	int free_space = tcp_space(sk);
 	int full_space = min_t(int, tp->window_clamp, tcp_full_space(sk));
 	int window;
@@ -2660,14 +2665,14 @@ void tcp_send_delayed_ack(struct sock *sk)
 	struct inet_connection_sock *icsk = inet_csk(sk);
 	int ato = icsk->icsk_ack.ato;
 	unsigned long timeout;
+	const struct tcp_sock *tp = tcp_sk(sk);
 
-	if (ato > TCP_DELACK_MIN) {
-		const struct tcp_sock *tp = tcp_sk(sk);
+	if (ato > icsk->icsk_ack.tcp_delack_min) {
 		int max_ato = HZ / 2;
 
 		if (icsk->icsk_ack.pingpong ||
 		    (icsk->icsk_ack.pending & ICSK_ACK_PUSHED))
-			max_ato = TCP_DELACK_MAX;
+			max_ato = icsk->icsk_ack.tcp_delack_max;
 
 		/* Slow path, intersegment interval is "high". */
 
@@ -2676,7 +2681,8 @@ void tcp_send_delayed_ack(struct sock *sk)
 		 * directly.
 		 */
 		if (tp->srtt) {
-			int rtt = max(tp->srtt >> 3, TCP_DELACK_MIN);
+			int rtt = max_t(unsigned, tp->srtt >> 3,
+					icsk->icsk_ack.tcp_delack_min);
 
 			if (rtt < max_ato)
 				max_ato = rtt;
@@ -2711,6 +2717,7 @@ void tcp_send_delayed_ack(struct sock *sk)
 void tcp_send_ack(struct sock *sk)
 {
 	struct sk_buff *buff;
+	struct inet_connection_sock *icsk = inet_csk(sk);
 
 	/* If we have been reset, we may not send again. */
 	if (sk->sk_state == TCP_CLOSE)
@@ -2723,9 +2730,10 @@ void tcp_send_ack(struct sock *sk)
 	buff = alloc_skb(MAX_TCP_HEADER, GFP_ATOMIC);
 	if (buff == NULL) {
 		inet_csk_schedule_ack(sk);
-		inet_csk(sk)->icsk_ack.ato = TCP_ATO_MIN;
+		icsk->icsk_ack.ato = TCP_ATO_MIN;
 		inet_csk_reset_xmit_timer(sk, ICSK_TIME_DACK,
-					  TCP_DELACK_MAX, TCP_RTO_MAX);
+					  icsk->icsk_ack.tcp_delack_max,
+					  TCP_RTO_MAX);
 		return;
 	}
 
