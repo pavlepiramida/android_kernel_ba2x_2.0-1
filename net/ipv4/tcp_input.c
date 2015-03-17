@@ -101,6 +101,8 @@ int sysctl_tcp_thin_dupack __read_mostly;
 int sysctl_tcp_moderate_rcvbuf __read_mostly = 1;
 int sysctl_tcp_abc __read_mostly;
 
+int sysctl_tcp_default_delack_segs __read_mostly = 1;
+
 #define FLAG_DATA		0x01 /* Incoming frame contained data.		*/
 #define FLAG_WIN_UPDATE		0x02 /* Incoming ACK was a window update.	*/
 #define FLAG_DATA_ACKED		0x04 /* This ACK acknowledged new data.		*/
@@ -141,8 +143,8 @@ static void tcp_measure_rcv_mss(struct sock *sk, const struct sk_buff *skb)
 	 * sends good full-sized frames.
 	 */
 	len = skb_shinfo(skb)->gso_size ? : skb->len;
-	if (len >= icsk->icsk_ack.rcv_mss) {
-		icsk->icsk_ack.rcv_mss = len;
+	if (len >= inet_csk_get_rcv_mss(sk)) {
+		inet_csk_set_rcv_mss(sk, len);
 	} else {
 		/* Otherwise, we make more careful check taking into account,
 		 * that SACKs block is variable.
@@ -165,7 +167,7 @@ static void tcp_measure_rcv_mss(struct sock *sk, const struct sk_buff *skb)
 			len -= tcp_sk(sk)->tcp_header_len;
 			icsk->icsk_ack.last_seg_size = len;
 			if (len == lss) {
-				icsk->icsk_ack.rcv_mss = len;
+				inet_csk_set_rcv_mss(sk, len);
 				return;
 			}
 		}
@@ -178,7 +180,8 @@ static void tcp_measure_rcv_mss(struct sock *sk, const struct sk_buff *skb)
 static void tcp_incr_quickack(struct sock *sk)
 {
 	struct inet_connection_sock *icsk = inet_csk(sk);
-	unsigned quickacks = tcp_sk(sk)->rcv_wnd / (2 * icsk->icsk_ack.rcv_mss);
+    unsigned int quickacks;
+    quickacks = tcp_sk(sk)->rcv_wnd / (2 * inet_csk_get_rcv_mss(sk));
 
 	if (quickacks == 0)
 		quickacks = 2;
@@ -305,7 +308,7 @@ static int __tcp_grow_window(const struct sock *sk, const struct sk_buff *skb)
 
 	while (tp->rcv_ssthresh <= window) {
 		if (truesize <= skb->len)
-			return 2 * inet_csk(sk)->icsk_ack.rcv_mss;
+			return 2 * inet_csk_get_rcv_mss(sk);
 
 		truesize >>= 1;
 		window >>= 1;
@@ -428,7 +431,7 @@ void tcp_initialize_rcv_mss(struct sock *sk)
 	hint = min(hint, TCP_MSS_DEFAULT);
 	hint = max(hint, TCP_MIN_MSS);
 
-	inet_csk(sk)->icsk_ack.rcv_mss = hint;
+	inet_csk_set_rcv_mss(sk, hint);
 }
 EXPORT_SYMBOL(tcp_initialize_rcv_mss);
 
@@ -498,7 +501,7 @@ static inline void tcp_rcv_rtt_measure_ts(struct sock *sk,
 	struct tcp_sock *tp = tcp_sk(sk);
 	if (tp->rx_opt.rcv_tsecr &&
 	    (TCP_SKB_CB(skb)->end_seq -
-	     TCP_SKB_CB(skb)->seq >= inet_csk(sk)->icsk_ack.rcv_mss))
+	     TCP_SKB_CB(skb)->seq >= inet_csk_get_rcv_mss(sk)))
 		tcp_rcv_rtt_update(tp, tcp_time_stamp - tp->rx_opt.rcv_tsecr, 0);
 }
 
@@ -4981,8 +4984,8 @@ static void __tcp_ack_snd_check(struct sock *sk, int ofo_possible)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
 
-	    /* More than one full frame received... */
-	if (((tp->rcv_nxt - tp->rcv_wup) > inet_csk(sk)->icsk_ack.rcv_mss &&
+	/* More than tcp_delack_segs full frame(s) received... */
+	if (((tp->rcv_nxt - tp->rcv_wup) > inet_csk_delack_thresh(sk) &&
 	     /* ... and right edge of window advances far enough.
 	      * (tcp_recvmsg() will send ACK otherwise). Or...
 	      */
@@ -5688,7 +5691,8 @@ static int tcp_rcv_synsent_state_process(struct sock *sk, struct sk_buff *skb,
 			tcp_incr_quickack(sk);
 			tcp_enter_quickack_mode(sk);
 			inet_csk_reset_xmit_timer(sk, ICSK_TIME_DACK,
-						  TCP_DELACK_MAX, TCP_RTO_MAX);
+						  icsk->icsk_ack.tcp_delack_max,
+						  TCP_RTO_MAX);
 
 discard:
 			__kfree_skb(skb);

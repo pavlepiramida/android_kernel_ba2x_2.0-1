@@ -1213,8 +1213,9 @@ void tcp_cleanup_rbuf(struct sock *sk, int copied)
 		   /* Delayed ACKs frequently hit locked sockets during bulk
 		    * receive. */
 		if (icsk->icsk_ack.blocked ||
-		    /* Once-per-two-segments ACK was not sent by tcp_input.c */
-		    tp->rcv_nxt - tp->rcv_wup > icsk->icsk_ack.rcv_mss ||
+		    /* More than once-per-tcp_delack_segs-segments ACK
+		     * was not sent by tcp_input.c */
+		    tp->rcv_nxt - tp->rcv_wup > inet_csk_delack_thresh(sk) ||
 		    /*
 		     * If this read emptied read buffer, we send ACK, if
 		     * connection is not bidirectional, user drained
@@ -2420,6 +2421,20 @@ static int do_tcp_setsockopt(struct sock *sk, int level,
 		else
 			icsk->icsk_user_timeout = msecs_to_jiffies(val);
 		break;
+
+	case TCP_DELACK_SEGS:
+		icsk->icsk_ack.tcp_delack_segs = val;
+		inet_csk_recalc_delack_thresh(sk);
+		break;
+
+	case TCP_DELACK_MIN:
+		icsk->icsk_ack.tcp_delack_min = val;
+		break;
+
+	case TCP_DELACK_MAX:
+		icsk->icsk_ack.tcp_delack_max = val;
+		break;
+
 	default:
 		err = -ENOPROTOOPT;
 		break;
@@ -2484,7 +2499,7 @@ void tcp_get_info(struct sock *sk, struct tcp_info *info)
 	info->tcpi_rto = jiffies_to_usecs(icsk->icsk_rto);
 	info->tcpi_ato = jiffies_to_usecs(icsk->icsk_ack.ato);
 	info->tcpi_snd_mss = tp->mss_cache;
-	info->tcpi_rcv_mss = icsk->icsk_ack.rcv_mss;
+	info->tcpi_rcv_mss = inet_csk_get_rcv_mss(sk);
 
 	if (sk->sk_state == TCP_LISTEN) {
 		info->tcpi_unacked = sk->sk_ack_backlog;

@@ -150,8 +150,7 @@ static void hsuart_power(int on)
 		return ;
 	}
 	#endif
-
-	BT_INFO("hsuart_power isOn(%d)\n", on);
+    
 	if (on) {
 		msm_hs_request_clock_on(bsi->uport);
 		#ifndef CONFIG_BT_CSR_7820
@@ -171,11 +170,16 @@ static void hsuart_power(int on)
  */
 static inline int bluesleep_can_sleep(void)
 {
+    if (bsi->uport == NULL) {
+        BT_INFO("bsi->uport == NULL");
+    }
 	/* check if MSM_WAKE_BT_GPIO and BT_WAKE_MSM_GPIO are both deasserted */
 	#ifdef CONFIG_BT_CSR_7820
-	return (ext_wake_active == 0) &&
+    int ret;
+	ret = (ext_wake_active == 0) &&
 		!gpio_get_value(bsi->host_wake) &&
 		(bsi->uport != NULL);
+    return ret;
 	#else
 	return gpio_get_value(bsi->ext_wake) &&
 		gpio_get_value(bsi->host_wake) &&
@@ -909,6 +913,8 @@ static int __init bluesleep_init(void)
 	#ifdef CONFIG_BT_CSR_7820
 	ext_wake_active = 0;
 	#endif
+    
+    hci_register_notifier(&hci_event_nblock);
 
 	return 0;
 
@@ -943,6 +949,7 @@ static void __exit bluesleep_exit(void)
 	}
 	#endif
 
+    hci_unregister_notifier(&hci_event_nblock);
 	platform_driver_unregister(&bluesleep_driver);
 
 	remove_proc_entry("asleep", sleep_dir);
