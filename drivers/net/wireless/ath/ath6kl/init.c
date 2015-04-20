@@ -1110,9 +1110,6 @@ static int ath6kl_fetch_fw_apin(struct ath6kl *ar, const char *name)
 				if (index == ie_len)
 					break;
 
-				if (index == ie_len)
-					break;
-
 				if (data[index] & (1 << bit))
 					__set_bit(i, ar->fw_capabilities);
 			}

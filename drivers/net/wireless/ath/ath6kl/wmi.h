@@ -1232,7 +1232,7 @@ struct wmi_set_ch_params {
 	__le16 ch_list[1];
 } __packed;
 
-#define WMI_MAX_CHANNELS        40
+#define WMI_MAX_CHANNELS        32
 
 /*
  *  WMI_RSSI_THRESHOLD_PARAMS_CMDID
