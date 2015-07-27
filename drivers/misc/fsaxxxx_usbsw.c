@@ -108,7 +108,7 @@
 
 #if defined(CONFIG_MACH_AMAZING) || defined(CONFIG_MACH_KYLE) || \
 	defined(CONFIG_MACH_AMAZING_CDMA)
-#define FSA9480_DEV_T1_USB_MASK		(DEV_USB)
+#define FSA9480_DEV_T1_USB_MASK		(DEV_USB_OTG | DEV_USB)
 #else
 #define FSA9480_DEV_T1_USB_MASK         (DEV_USB_OTG | DEV_USB)
 #endif
@@ -146,6 +146,8 @@
 #define FSA9480_ID	0
 #define FSA9280_ID	1
 #define FSA880_ID	2
+#include <mach/msm72k_otg.h>
+extern void otg_set_mode(int host);
 
 struct fsausb_info {
 	struct i2c_client *client;
@@ -468,6 +470,10 @@ static void fsausb_detect_dev(struct fsausb_info *usbsw, u8 intr)
 					   usbsw->mansw);
 			charger_cb_flag = 1;
 		}
+		if (val1 & DEV_USB_OTG) {
+			// otg cable detected
+			otg_set_mode(1);
+		}
 		if (val1 & FSA9480_DEV_T1_UART_MASK ||
 				val2 & FSA_DEV_T2_UART_MASK) {
 			if (pdata->uart_cb)
@@ -536,6 +542,7 @@ static void fsausb_detect_dev(struct fsausb_info *usbsw, u8 intr)
 				}
 			charger_cb_flag = 0;
 		}
+		otg_set_mode(0);
 		if (usbsw->dev1 & FSA9480_DEV_T1_UART_MASK ||
 				usbsw->dev2 & FSA_DEV_T2_UART_MASK) {
 			if (pdata->uart_cb)
