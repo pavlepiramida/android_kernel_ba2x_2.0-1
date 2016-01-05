@@ -47,8 +47,6 @@
 #define ASSERT_INVERTED_SENTINEL(_x, _y) do { } while (0)
 #endif
 
-#define ASSERT_SPINLOCK(_l)	WARN_ON(!spin_is_locked(_l))
-
 /*
  * A pool is the highest-level data structure managed by tmem and
  * usually corresponds to a large independent set of pages such as
