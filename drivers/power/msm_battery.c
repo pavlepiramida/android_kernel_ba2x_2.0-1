@@ -727,9 +727,12 @@ const char *oem_chg_str[] = {
 
 static int pm_msm_proc_comm(u32 cmd, u32 *data1, u32 *data2)
 {
+
+#if 0	
 	pr_info("%s,\td1=%s,\td2=%d\n",
 			oem_str[cmd - PCOM_OEM_CHARGING_INFO],
 			oem_chg_str[*data1], *data2);
+#endif
 	return msm_proc_comm(cmd, data1, data2);
 }
 
@@ -828,7 +831,9 @@ struct workqueue_struct *msm_batt_cable_wq;
 
 static void batt_timeover(unsigned long arg)
 {
+#if 0	
 	pr_info("[BATT] %s: timer !!\n", __func__);
+#endif	
 	queue_work(msm_batt_info.msm_batt_wq, &msm_batt_work);
 	mod_timer(&msm_batt_info.timer, (jiffies + BATT_CHECK_INTERVAL));
 }
@@ -849,7 +854,9 @@ void msm_battery_fuel_alert(void)
 
 static void msm_batt_check_event(struct work_struct *work)
 {
+#if 0
 	pr_info("[BATT] %s: work !!\n", __func__);
+#endif
 	msm_batt_update_psy_status();
 }
 
@@ -1007,8 +1014,10 @@ void msm_bat_use_timer_func(unsigned long param)
 	struct msm_battery_info *chg = (struct msm_battery_info *)param;
 
 	msm_batt_info.batt_use &= (~msm_batt_info.batt_use_wait);
+#if 0
 	pr_info("[BATT]batt_use timer expired (0x%x)\n",
 			msm_batt_info.batt_use);
+#endif
 #if 0
 	if (msm_batt_info.batt_status == POWER_SUPPLY_STATUS_CHARGING &&
 		(msm_batt_info.cable_status == CABLE_TYPE_TA)  &&
@@ -1024,7 +1033,9 @@ void msm_bat_use_module(int module, int enable)
 {
 	if (!enable && (msm_batt_info.batt_use
 			== msm_batt_info.batt_use_wait)) {
+#if 0
 		pr_info("/BATT_USE/ ignore duplicated of same event\n");
+#endif
 		return;
 	}
 
@@ -1304,7 +1315,9 @@ static ssize_t msm_batt_store_property(struct device *dev,
 	case BATT_RESET_SOC:
 #if defined(CONFIG_MACH_KYLE)
 	case FG_RESET_SOC:
+#if 0
 		pr_info("[BATT] %s: RESET SOC!!!\n", __func__);
+#endif
 #endif
 		if (sscanf(buf, "%d\n", &x) == 1)	{
 			msm_batt_info.pdata->psy_fuelgauge->set_property(
@@ -1517,7 +1530,9 @@ void msm_set_cable(struct msm_battery_callback *ptr,
 			enum cable_type_t status)
 {
 	flush_work_sync(msm_batt_cable_wq);
+#if 0
 	pr_info("%s : [BATT] cable_status(%d)\n", __func__, status);
+#endif
 	msm_batt_info.cable_status = status;
 	queue_work(msm_batt_cable_wq, &msm_batt_wq_setcable);
 }
@@ -1525,8 +1540,9 @@ void msm_set_cable(struct msm_battery_callback *ptr,
 static void msm_batt_set_cable_bt(struct work_struct *work)
 {
 	struct msm_battery_info *chg = &msm_batt_info;
+#if 0
 	pr_info("%s : [BATT] cable_status(%d)\n", __func__, chg->cable_status);
-
+#endif
 	if (chg->cable_status == CABLE_TYPE_UNKNOWN) {
 		msm_batt_info.charging_source = NO_CHG;
 		msm_batt_info.batt_status =
@@ -1583,11 +1599,15 @@ static void msm_batt_set_cable_bt(struct work_struct *work)
 skip:
 	power_supply_changed(&msm_psy_ac);
 	power_supply_changed(&msm_psy_usb);
+#if 0
 	pr_info("%s : [BATT] batt_status(%d) charger_type(%d) source(%d)\n",
 		__func__, msm_batt_info.batt_status,
 		msm_batt_info.charger_type, msm_batt_info.charging_source);
+#endif
 	if (set_timer == 1) {
+#if 0
 		pr_info("[BATT] timer setting enable\n");
+#endif
 		queue_work(msm_batt_info.msm_batt_wq, &msm_batt_work);
 		mod_timer(&msm_batt_info.timer,
 			(jiffies + BATT_CHECK_INTERVAL));
@@ -1601,14 +1621,18 @@ void msm_set_acc_type(struct msm_battery_callback *ptr,
 		container_of(ptr, struct msm_battery_info, callback);
 
 	chg->acc_status = status;
+#if 0
 	pr_info("%s : [BATT] acc_status = %d\n", __func__, chg->acc_status);
+#endif
 }
 
 void msm_set_ovp_type(struct msm_battery_callback *ptr,
 				enum ovp_type_t status)
 {
 	flush_work_sync(msm_batt_cable_wq);
+#if 0
 	pr_info("[BATT:%s] ovp_status(%d)\n", __func__, status);
+#endif
 	msm_batt_info.ovp_status = status;
 	queue_work(msm_batt_cable_wq, &msm_batt_wq_ovp);
 }
@@ -1616,13 +1640,14 @@ void msm_set_ovp_type(struct msm_battery_callback *ptr,
 static void msm_batt_ovp_bt(struct work_struct *work)
 {
 	struct msm_battery_info *chg = &msm_batt_info;
-
+#if 0
 	pr_info("[BATT:%s] ovp_status(%d)\n", __func__, chg->ovp_status);
-
+#endif
 	if (chg->ovp_status == 1 && msm_batt_info.batt_status ==
 		POWER_SUPPLY_STATUS_CHARGING) {
+#if 0
 		pr_info("%s : [BATT] do ovp protection\n", __func__);
-
+#endif
 		msm_batt_info.batt_status =
 			POWER_SUPPLY_STATUS_NOT_CHARGING;
 		msm_batt_info.batt_full_check = 0;
@@ -1724,10 +1749,12 @@ static int msm_batt_power_get_property(struct power_supply *psy,
 #endif
 				}
 				if (msm_batt_info.batt_capacity !=  value.intval) {
+#if 0
 					pr_info(
 					"[BATT] %s: Battery level changed ! (%d -> %d)\n",
 					__func__, msm_batt_info.batt_capacity,
 					value.intval);
+#endif
 				msm_batt_info.batt_capacity =  value.intval;
 			}
 		}
@@ -1751,8 +1778,9 @@ static void msm_batt_set_alarm(int seconds)
 	ktime_t low_interval = ktime_set(seconds - 10, 0);
 	ktime_t slack = ktime_set(20, 0);
 	ktime_t next;
-
+#if 0
 	pr_info("%s[BATT] set alarm\n", __func__);
+#endif
 	next = ktime_add(msm_batt_info.last_poll, low_interval);
 	alarm_start_range(&msm_batt_info.alarm, next,
 				ktime_add(next, slack));
@@ -1881,10 +1909,10 @@ int calculate_batt_level(int batt_volt)
 				scaled_level = 1;
 		}
 	}
-
+#if 0
 	pr_info("[Battery] %s : batt_volt %d, scaled_level %d, g_chg_en %d\n",
 		__func__, batt_volt, scaled_level, g_chg_en);
-
+#endif
 	prev_scaled_level = scaled_level;
 	msm_batt_info.batt_capacity = scaled_level;
 	return 1;
@@ -1917,10 +1945,14 @@ int calculate_batt_voltage(int vbatt_adc)
 		if (g_chg_en) {
 			if (prevVal < (vbatt_adc-chg_comp)) {
 				vbatt_adc = vbatt_adc-chg_comp;
+#if 0
 				pr_info("[Battery] vbatt_adc-BATT_CAL_CHG\n");
+#endif
 			} else {
 				vbatt_adc = prevVal;
+#if 0
 				pr_info("[Battery] chg_en & prevVal\n");
+#endif
 			}
 		} else {
 			if (prevVal < vbatt_adc)
@@ -1929,9 +1961,9 @@ int calculate_batt_voltage(int vbatt_adc)
 	}
 	prevVal = vbatt_adc;
 #endif
-
+#if 0
 	pr_info("[Battery] %s : vbatt_adc %d\n", __func__, vbatt_adc);
-
+#endif
 	if (vbatt_adc >= BATT_FULL_ADC) {
 		batt_volt = BATT_FULL_VOLT;
 	} else if (vbatt_adc >=  BATT_LEVEL6_ADC) {
@@ -1972,9 +2004,10 @@ int calculate_batt_voltage(int vbatt_adc)
 	} else {
 		batt_volt = BATT_LOW_VOLT;
 	}
+#if 0
 	pr_info("[Battery] %s : vbatt_adc %d & batt_volt %d\n",
 		__func__, vbatt_adc, batt_volt);
-
+#endif
 	return batt_volt;
 }
 #endif /*CONFIG_MAX17043_FUEL_GAUGE*//*end for rev 03 version for cal voltage*/
@@ -2322,7 +2355,9 @@ static int msm_batt_check_level(int battery_level)
 
 	if (msm_batt_info.batt_capacity != battery_level)
 	{
+#if 0
 		pr_info("[BATT] %s: Battery level changed ! (%d -> %d)\n", __func__, msm_batt_info.batt_capacity, battery_level);
+#endif
 		msm_batt_info.batt_capacity = battery_level;
 		return 1;
 	}
@@ -2551,9 +2586,10 @@ static int msm_batt_control_temperature(int temp_adc)
 
 	msm_batt_info.battery_temp = temp_adc * 10;
 #endif
-
+#if 0
 	pr_info("%s [BATT] battery_temp : %d temp_adc : %d\n", __func__,
 		msm_batt_info.battery_temp, temp_adc);
+#endif
 	/*  TODO:  check application */
 
 #if defined(CONFIG_MACH_KYLE)	/* MAX17048 RCOMP Update */
@@ -2933,10 +2969,11 @@ static void msm_batt_update_psy_status(void)
 	if (charging_boot)
 		msm_batt_info.batt_status = batt_prestatus;
 	battery_temp = msm_batt_info.batt_temp_aver;
-
+#if 0
 	pr_info("%s [BATTERY] Rev03 level : %d, voltage : %d"
 		",temp : %d,  temp_adc : %d\n", __func__, battery_level,
 		msm_batt_info.battery_vol,battery_temp,battery_temp_adc);
+#endif
 #endif
 #ifdef CONFIG_BQ27425_FUEL_GAUGE
 	battery_level = get_level_from_fuelgauge();
@@ -2956,7 +2993,7 @@ static void msm_batt_update_psy_status(void)
 	/*chg_current_adc = rep_batt_chg.v1.chg_current;*/
 	battery_temp_adc = rep_batt_chg.v1.battery_temp_adc;
 	/*msm_batt_info.battery_temp = rep_batt_chg.v1.battery_temp_degree;*/
-
+#if 0
 	pr_info("%s [BATTERY] Rev05 level : %d, voltage : %d, temp_ap %d"
 		" temp_cp : %d, current_fg : %d cur_cp :%d status %d"
 		"battery_temp_adc\n",
@@ -2964,6 +3001,7 @@ static void msm_batt_update_psy_status(void)
 		msm_batt_info.battery_temp, msm_batt_info.batt_temp_aver,
 		msm_batt_info.batt_fuel_current, chg_current_adc,
 		msm_batt_info.batt_status, battery_temp_adc);
+#endif
 #endif	/* CONFIG_MAX17043_FUEL_GAUGE */
 
 	if ((msm_batt_info.batt_status == POWER_SUPPLY_STATUS_CHARGING) ||
@@ -3167,9 +3205,9 @@ static int msm_batt_modify_client(u32 client_handle, u32 desired_batt_voltage,
 void msm_batt_early_suspend(struct early_suspend *h)
 {
 	int rc;
-
+#if 0
 	pr_debug("%s: enter\n", __func__);
-
+#endif
 	if (msm_batt_info.batt_handle != INVALID_BATT_HANDLE) {
 		rc = msm_batt_modify_client(msm_batt_info.batt_handle,
 				msm_batt_info.voltage_fail_safe,
@@ -3187,16 +3225,17 @@ void msm_batt_early_suspend(struct early_suspend *h)
 		pr_err("%s: ERROR. invalid batt_handle\n", __func__);
 		return;
 	}
-
+#if 0
 	pr_debug("%s: exit\n", __func__);
+#endif
 }
 
 void msm_batt_late_resume(struct early_suspend *h)
 {
 	int rc;
-
+#if 0
 	pr_debug("%s: enter\n", __func__);
-
+#endif
 	if (msm_batt_info.batt_handle != INVALID_BATT_HANDLE) {
 		rc = msm_batt_modify_client(msm_batt_info.batt_handle,
 				msm_batt_info.voltage_fail_safe,
@@ -3212,8 +3251,9 @@ void msm_batt_late_resume(struct early_suspend *h)
 		pr_err("%s: ERROR. invalid batt_handle\n", __func__);
 		return;
 	}
-
+#if 0
 	pr_debug("%s: exit\n", __func__);
+#endif
 }
 #endif
 
@@ -3552,13 +3592,19 @@ static int msm_batt_deregister(u32 batt_handle)
 static int msm_batt_suspend(struct platform_device *pdev,
 		pm_message_t state)
 {
+#if 0
 	pr_debug("[BATT] %s\n", __func__);
+#endif
 	if (msm_batt_info.batt_capacity < 5) {
 		msm_batt_set_alarm(ALARM_POLLING_TIME_SHORT);
+#if 0
 		pr_info("%s[BATT] set alarm for long time\n", __func__);
-	} else {
+#endif	
+		} else {
 		msm_batt_set_alarm(ALARM_POLLING_TIME_LONG);
+#if 0
 		pr_info("%s[BATT] set alarm for shor time\n", __func__);
+#endif
 	}
 	del_timer_sync(&msm_batt_info.timer);
 
@@ -3567,11 +3613,13 @@ static int msm_batt_suspend(struct platform_device *pdev,
 
 static int msm_batt_resume(struct platform_device *pdev)
 {
+#if 0
 	pr_debug("[BATT] %s\n", __func__);
+#endif
 	msm_batt_info.resume_flag = 1;
-
+#if 0
 	pr_info("[BATT] set alarm for resume\n");
-
+#endif
 	queue_work(msm_batt_info.msm_batt_wq, &msm_batt_work);
 	mod_timer(&msm_batt_info.timer, (jiffies + BATT_CHECK_INTERVAL));
 

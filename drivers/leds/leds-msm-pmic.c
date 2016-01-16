@@ -46,7 +46,7 @@ static void msm_keypad_bl_led_set(struct led_classdev *led_cdev,
 	else
 		gpio_set_value(n_GPIO_KEY_LED_EN, 0);
 
-	printk("[KeyLED] %s: gpio124_value=%d\n", __func__, gpio_get_value(n_GPIO_KEY_LED_EN));
+	//printk("[KeyLED] %s: gpio124_value=%d\n", __func__, gpio_get_value(n_GPIO_KEY_LED_EN));
 }
 
 static struct led_classdev msm_kp_bl_led = {
@@ -71,12 +71,12 @@ static void enable_led_notification(void){
 		/* signal ongoing led notification */
 		bln_notification_ongoing = true;
 		enable_touchkey_backlights();
-		printk("%s: notification led enabled\n", __FUNCTION__);
+		//printk("%s: notification led enabled\n", __FUNCTION__);
 	}
 }
 
 static void disable_led_notification(void){
-	printk("%s: notification led disabled\n", __FUNCTION__);
+	//printk("%s: notification led disabled\n", __FUNCTION__);
 	/* disable the blink state */
 	bln_blink_enabled = false;
 	disable_touchkey_backlights();
@@ -96,12 +96,12 @@ static ssize_t backlightnotification_status_write(struct device *dev, struct dev
 		if(data == 0 || data == 1){
 
 			if(data == 1){
-				printk("%s: backlightnotification function enabled\n", __FUNCTION__);
+				//printk("%s: backlightnotification function enabled\n", __FUNCTION__);
 				bln_enabled = true;
 			}
 
 			if(data == 0){
-				printk("%s: backlightnotification function disabled\n", __FUNCTION__);
+				//printk("%s: backlightnotification function disabled\n", __FUNCTION__);
 				bln_enabled = false;
 				if (bln_notification_ongoing)
 					disable_led_notification();
@@ -204,7 +204,7 @@ static struct miscdevice backlightnotification_device = {
 static int msm_pmic_led_probe(struct platform_device *pdev)
 {
 	int rc;
-	printk("[KeyLED] %s \n", __func__);
+	//printk("[KeyLED] %s \n", __func__);
 	rc = led_classdev_register(&pdev->dev, &msm_kp_bl_led);
 	if (rc) {
 		dev_err(&pdev->dev, "unable to register led class driver\n");
@@ -230,7 +230,7 @@ static int msm_pmic_led_probe(struct platform_device *pdev)
 
 static int __devexit msm_pmic_led_remove(struct platform_device *pdev)
 {
-	printk("[KeyLED] %s \n", __func__);
+	//printk("[KeyLED] %s \n", __func__);
 	led_classdev_unregister(&msm_kp_bl_led);
 #ifdef CONFIG_KEYPAD_TOUCH_BLN
 	misc_deregister(&backlightnotification_device);
@@ -253,7 +253,7 @@ static int msm_pmic_led_suspend(struct platform_device *dev,
 	{
 		msm_keypad_bl_led_set(&msm_kp_bl_led, 0);
 		led_classdev_suspend(&msm_kp_bl_led);
-		printk("[KeyLED] %s \n", __func__);
+		//printk("[KeyLED] %s \n", __func__);
 	}
 #ifdef CONFIG_KEYPAD_TOUCH_BLN
 	else
@@ -265,7 +265,7 @@ static int msm_pmic_led_suspend(struct platform_device *dev,
 
 static int msm_pmic_led_resume(struct platform_device *dev)
 {
-	printk("[KeyLED] %s \n", __func__);
+	//printk("[KeyLED] %s \n", __func__);
 	led_classdev_resume(&msm_kp_bl_led);
         return 0;
 }
@@ -287,14 +287,14 @@ static struct platform_driver msm_pmic_led_driver = {
 
 static int __init msm_pmic_led_init(void)
 {
-	printk("[KeyLED] %s \n", __func__);
+	//printk("[KeyLED] %s \n", __func__);
 	return platform_driver_register(&msm_pmic_led_driver);
 }
 module_init(msm_pmic_led_init);
 
 static void __exit msm_pmic_led_exit(void)
 {
-	printk("[KeyLED] %s \n", __func__);
+	//printk("[KeyLED] %s \n", __func__);
 	platform_driver_unregister(&msm_pmic_led_driver);
 }
 module_exit(msm_pmic_led_exit);

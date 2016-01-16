@@ -662,7 +662,7 @@ static void melfas_ts_get_data(struct work_struct *work)
 	int keyID = 0, touchType = 0, touchState = 0;
 	u8 setLowLevelData[2];
 	if (tsp_enabled == false) {
-		printk(KERN_ERR "[TSP ]%s. tsp_disabled.\n", __func__);
+		//printk(KERN_ERR "[TSP ]%s. tsp_disabled.\n", __func__);
 		msleep(500);
 		return;
 	}
@@ -733,8 +733,8 @@ static void melfas_ts_get_data(struct work_struct *work)
 					touchState = (buf[i] & 0x80);
 					gMenuKey_Intensity = 0;
 					gBackKey_Intensity = 0;
-			printk(KERN_ERR "[TSP] keyID : %d, touchstate : %d\n"
-					, keyID, touchState);
+			//printk(KERN_ERR "[TSP] keyID : %d, touchstate : %d\n"
+					//, keyID, touchState);
 					if (keyID == 0x1) {
 						if (touchState)
 							menu_pressed = 1;

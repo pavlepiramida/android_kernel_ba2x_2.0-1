@@ -270,7 +270,9 @@ static void max17048_reset(struct i2c_client *client)
 
 	res = max17048_write_word(client, max17048_MODE_MSB, reset_cmd);
 	msleep(500);
+#if 0
 	pr_info("%s : I2c res=0x%x\n", __func__, res);
+#endif
 }
 
 static int max17048_get_average_vcell(struct i2c_client *client)
@@ -392,8 +394,9 @@ static void max17048_get_version(struct i2c_client *client)
 {
 	u8 data[2];
 	int temp;
+#if 0
 	pr_info("%s :\n", __func__);
-
+#endif
 	if (is_max17048) {
 		temp = max17048_read_word(client, max17048_VER_MSB);
 		data[1] = temp & 0xff;
@@ -423,8 +426,9 @@ if (is_max17048) {
 
 	ret = (u16)(data[0]<<8 | data[1]);
 	/* pr_info("max17048 Fuel-Gauge RCOMP 0x%x%x\n", msb, lsb); */
+#if 0
 	pr_info("%s : current rcomp = 0x%x(%x)\n", __func__, ret, temp);
-
+#endif
 	return ret;
 }
 
@@ -435,10 +439,10 @@ static void max17048_set_rcomp(struct i2c_client *client, u16 new_rcomp)
 
 	i2c_buf[1] = new_rcomp & 0xff;
 	i2c_buf[0] = (u16)(new_rcomp >> 8);
-
+#if 0
 	pr_info("%s : new rcomp = 0x%x(%x)\n", __func__,
 				new_rcomp, new_rcomp>>8);
-
+#endif
 	max17048_write_word(client, max17048_RCOMP_MSB, i2c_buf);
 
 }
@@ -449,10 +453,10 @@ static u16 max17048_get_register_word(struct i2c_client *client, int reg)
 	u16 ret = 0;
 
 	temp = max17048_read_word(client, reg);
-
+#if 0
 	pr_info("%s : reg(%xh) : 0x%x\n",
 		__func__, reg, temp);
-
+#endif
 	return ret;
 }
 
@@ -507,13 +511,14 @@ static void max17048_work(struct work_struct *work)
 	pr_info("%s : Raw SOC:%d%%, SOC:%d%%\n", __func__,
 		chip->raw_soc, chip->soc);
 	#endif
+#if 0
 	pr_info("%s : CONFIG:0x%04x, RATE:0x%04x\n", __func__,
 		max17048_read_word(chip->client, max17048_RCOMP_MSB),
 		max17048_read_word(chip->client, 0x16));
 	pr_info("%s : STATUS:0x%04x, temperature:%d\n", __func__,
 		max17048_read_word(chip->client, 0x1a),
 		chip->temperature);
-
+#endif
 	max17048_dump_regs(chip->client);
 
 	if ((chip->soc >= 5) && (chip->is_wakelock_active)) {
@@ -641,9 +646,9 @@ static irqreturn_t max17048_int_work_func(int irq, void *max_chip)
 
 	u8 data[2];
 	u16 ret = 0;
-
+#if 0
 	pr_info("[ALERT] %s\n", __func__);
-
+#endif
 	wake_lock(&chip->lowbat_wake_lock);
 	chip->is_wakelock_active = true;
 
@@ -718,11 +723,13 @@ static void max17048_rcomp_update(struct i2c_client *client,
 	/* chip->new_rcomp = ((u8)new_rcomp << 8) | (chip->rcomp&0xFF); */
 
 		if (chip->rcomp != chip->new_rcomp) {
+#if 0
 			pr_info("%s : temp(%d), rcomp 0x%x -> 0x%x (%d)\n",
 				__func__, temp,
 				chip->rcomp,
 				chip->new_rcomp,
 				chip->new_rcomp>>8);
+#endif
 			chip->rcomp = chip->new_rcomp;
 			max17048_set_rcomp(client, chip->new_rcomp);
 		}
@@ -747,10 +754,12 @@ static void max17048_rcomp_update(struct i2c_client *client,
 			chip->new_rcomp = chip->pdata->rcomp_value;
 
 		if (chip->rcomp != chip->new_rcomp) {
+#if 0
 			pr_info("%s : 0x%x -> 0x%x (%d)\n", __func__,
 							chip->rcomp,
 							chip->new_rcomp,
 							chip->new_rcomp>>8);
+#endif
 		}
 	}
 }

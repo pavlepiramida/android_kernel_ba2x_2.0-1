@@ -123,9 +123,9 @@ static void power_supply_changed_work(struct work_struct *work)
 static void power_supply_changed_direct(struct power_supply *psy)
 {
 	unsigned long flags;
-
+#if 0
 	printk(KERN_ERR "%s enter.\n", __func__);
-
+#endif
 	spin_lock_irqsave(&psy->changed_lock, flags);
 	if (psy->changed) {
 		psy->changed = false;
@@ -142,8 +142,9 @@ static void power_supply_changed_direct(struct power_supply *psy)
 	if (!psy->changed)
 		wake_unlock(&psy->work_wake_lock);
 	spin_unlock_irqrestore(&psy->changed_lock, flags);
-
+#if 0
 	printk(KERN_ERR "%s exit.\n", __func__);
+#endif
 }
 
 void power_supply_changed(struct power_supply *psy)
